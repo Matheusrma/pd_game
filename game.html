@@ -98,6 +98,7 @@ var currentPeriod = 0;
 var periodTarget = [10,10,10,10,10,10,10,10,10,10];
 var periodDistractionRates = [0.3,0.25,0.3,0.4,0.35,0.45,0.5,0.55,0.6,0.6];
 
+var archiveText;
 var scoreText;
 var periodText;
 
@@ -111,10 +112,14 @@ function create() {
     var bottomHeader = game.add.sprite(0, game.world.height - 30, 'header');
     bottomHeader.bringToTop();
 
-    scoreText  = game.add.text(game.world.width - 100, game.world.height - 22, '0/' + periodTarget[0] + ' arquivos', 
-                               { font: '14px Helvetica', fill: '#FFF' });
+    var font = { font: '14px Helvetica', fill: '#FFF' , fontWeight:'500' };
+    var textY = game.world.height - 24;
 
-    periodText = game.add.text(8, game.world.height - 22, 'Calouro', { font: '14px Helvetica', fill: '#FFF' });
+    scoreText  = game.add.text(game.world.width - 85, textY, 'Pontos: 0', font);
+
+    archiveText  = game.add.text(8, textY, '0/' + periodTarget[0] + ' arquivos',  font);
+
+    periodText = game.add.text(260, textY, 'Calouro', font);
 
     collectables = game.add.group();
     collectables.enableBody = true;
@@ -155,8 +160,8 @@ var collect = function(player, collectable){
 
             archiveCount = 0;   
         }
-
-        scoreText.text = archiveCount + '/' + periodTarget[currentPeriod] + ' arquivos.';
+        scoreText.text = 'Pontos: ' + archiveCount * 100 + currentPeriod + 1000;
+        archiveText.text = archiveCount + '/' + periodTarget[currentPeriod] + ' arquivos';
     }
     else{
         player.kill();
