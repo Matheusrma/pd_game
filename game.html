@@ -31,6 +31,8 @@ var archiveSpeed = 100;
 
 var archives;
 var archiveCount = 0;
+var archiveSpawnDelay = 200;
+var lastArchiveSpawn = 0;
 
 var scoreText;
 
@@ -48,7 +50,7 @@ function create() {
     player.body.gravity.y = 300;
     player.body.collideWorldBounds = true;
 
-    scoreText = game.add.text(8, 8, 'score: 0', { fontSize: '10px', fill: '#000' });
+    scoreText = game.add.text(8, 8, 'Você baixou 0 arquivos.', { fontSize: '10px', fill: '#000' });
 }
 
 function update() {
@@ -62,12 +64,16 @@ function update() {
 var collectArchive = function(player, archive){
     archiveCount++;
 
-    scoreText.text = 'Score: ' + archiveCount;
+    scoreText.text = 'Você baixou ' + archiveCount + ' arquivos.';
 
     archive.kill();
 }
 
 var spawnArchive = function(){
+    if (game.time.time - lastArchiveSpawn < archiveSpawnDelay ) return;
+
+    lastArchiveSpawn = game.time.time;
+
     var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 24));
 
     var archive = archives.create(spawnX, 12, 'star');
