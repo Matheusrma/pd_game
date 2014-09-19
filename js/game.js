@@ -17,104 +17,103 @@ var archiveText;
 var scoreText;
 var periodText;
 
-var PdGame = {
-    Game: {
-        preload: function() {
-            game.load.image('back', 'assets/back.png');
-            game.load.image('header', 'assets/header.png');
-            game.load.image('archive', 'assets/archive.png'); //32x32
-            game.load.image('beer', 'assets/beer.png'); //32x32
-            game.load.image('pd', 'assets/pd.png'); //32x32
-            game.load.image('playerAvatar', 'assets/player.png'); //64x64
-        },
+var PdGame = {};
 
-        create: function() {
-            game.physics.startSystem(Phaser.Physics.ARCADE);
-            game.add.sprite(0, 0, 'back');
+PdGame.Game = function() {
+    this.collect = function(player, collectable){
+        if (collectable.key == 'pd'){
+            collectable.kill();
 
-            var topHeader = game.add.sprite(0, 0, 'header');
-            topHeader.bringToTop();
-
-            var bottomHeader = game.add.sprite(0, game.world.height - 30, 'header');
-            bottomHeader.bringToTop();
-
-            var font = { font: '14px Helvetica', fill: '#FFF' , fontWeight:'500' };
-            var textY = game.world.height - 24;
-
-            scoreText  = game.add.text(game.world.width - 85, textY, 'Pontos: 0', font);
-            archiveText  = game.add.text(8, textY, '0/' + periodTarget[0] + ' arquivos',  font);
-            periodText = game.add.text(260, textY, 'Calouro', font);
-
-            collectables = game.add.group();
-            collectables.enableBody = true;
-
-            var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 64 - headerHeight, 'playerAvatar');
-            player = new Player(playerSprite, 200, 0);
-
-            collectableSpawner = new CollectableSpawner(collectables, 400, 150, 100, periodDistractionRates);
-        },
-
-        update: function() {
-
-            function collect(player, collectable){
-                if (collectable.key == 'pd'){
-                    console.log('FOI')
-
-                    collectable.kill();
-
-                    collectables.forEach(function(item){
-                        if (item.alive && item.key == 'beer'){
-
-                            if (item.inWorld){
-                                console.log(item.x)
-                                collectableSpawner.spawnObject('archive', item.x, item.y);
-                            }
-
-                            item.kill();    
-                        }
-                    }, true);
-                }else if (collectable.key == 'archive'){
-                    collectable.kill();
-
-                    archiveCount++;
-
-                    if (archiveCount >= periodTarget[currentPeriod]){
-                        currentPeriod++;
-
-                        if (currentPeriod < periodTarget.length - 1){
-                            periodText.text = currentPeriod + 1 +'º periodo';          
-                        }
-                        else if (currentPeriod == periodTarget.length - 1){
-                            periodText.text = 'Formando';             
-                        }    
-                        else{
-                            gameEnd(true); 
-                            return;
-                        }
-
-                        archiveCount = 0;   
+            collectables.forEach(function(item){
+                if (item.alive && item.key == 'beer'){
+                    if (item.inWorld){
+                        collectableSpawner.spawnObject('archive', item.x, item.y);
                     }
 
-                    scoreText.text = 'Pontos: ' + ((archiveCount * 100) + (currentPeriod * 1000));
-                    archiveText.text = archiveCount + '/' + periodTarget[currentPeriod] + ' arquivos';
-                }else{
-                    player.kill();
-                    gameEnd(false);      
+                    item.kill();    
                 }
+            }, true);
+        }else if (collectable.key == 'archive'){
+            collectable.kill();
+
+            archiveCount++;
+
+            if (archiveCount >= periodTarget[currentPeriod]){
+                currentPeriod++;
+
+                if (currentPeriod < periodTarget.length - 1){
+                    periodText.text = currentPeriod + 1 +'º periodo';          
+                }
+                else if (currentPeriod == periodTarget.length - 1){
+                    periodText.text = 'Formando';             
+                }    
+                else{
+                    this.gameEnd(true); 
+                    return;
+                }
+
+                archiveCount = 0;   
             }
 
-            function gameEnd(win){
-                console.log('YOU LOSE ' + win);
-            }
-
-            game.physics.arcade.overlap(player.entinty, collectables, collect, null, this);
-
-            player.move(game.input.keyboard.createCursorKeys());
-
-            collectableSpawner.spawn(currentPeriod);
-        }
-
+            scoreText.text = 'Pontos: ' + ((archiveCount * 100) + (currentPeriod * 1000));
+            archiveText.text = archiveCount + '/' + periodTarget[currentPeriod] + ' arquivos';
+        }else{
+            player.kill();
+            this.gameEnd(false);      
+        }                   
     }
-}
 
-var game = new Phaser.Game(600, 600, Phaser.AUTO, '', PdGame.Game);
+    this.gameEnd = function(win){
+        console.log('YOU LOSE ' + win);
+    }
+};
+
+PdGame.Game.prototype = {
+    preload: function() {
+        game.load.image('back', 'assets/back.png');
+        game.load.image('header', 'assets/header.png');
+        game.load.image('archive', 'assets/archive.png'); //32x32
+        game.load.image('beer', 'assets/beer.png'); //32x32
+        game.load.image('pd', 'assets/pd.png'); //32x32
+        game.load.image('playerAvatar', 'assets/player.png'); //64x64
+    },
+
+    create: function() {
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        game.add.sprite(0, 0, 'back');
+
+        var topHeader = game.add.sprite(0, 0, 'header');
+        topHeader.bringToTop();
+
+        var bottomHeader = game.add.sprite(0, game.world.height - 30, 'header');
+        bottomHeader.bringToTop();
+
+        var font = { font: '14px Helvetica', fill: '#FFF' , fontWeight:'500' };
+        var textY = game.world.height - 24;
+
+        scoreText  = game.add.text(game.world.width - 85, textY, 'Pontos: 0', font);
+        archiveText  = game.add.text(8, textY, '0/' + periodTarget[0] + ' arquivos',  font);
+        periodText = game.add.text(260, textY, 'Calouro', font);
+
+        collectables = game.add.group();
+        collectables.enableBody = true;
+
+        var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 64 - headerHeight, 'playerAvatar');
+        player = new Player(playerSprite, 200, 0);
+
+        collectableSpawner = new CollectableSpawner(collectables, 400, 150, 100, periodDistractionRates);
+    },
+
+    update: function() {
+        game.physics.arcade.overlap(player.entinty, collectables, this.collect, null, this);
+
+        player.move(game.input.keyboard.createCursorKeys());
+
+        collectableSpawner.spawn(currentPeriod);
+    }
+};
+
+var game = new Phaser.Game(600, 600, Phaser.AUTO, 'game');
+//game.state.add('MainMenu', PdGame.MainMenu);
+game.state.add('Game', PdGame.Game);
+game.state.start('Game');
