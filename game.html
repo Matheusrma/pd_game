@@ -20,11 +20,11 @@ function preload() {
     game.load.image('back', 'assets/back.png');
     game.load.image('header', 'assets/header.png');
     game.load.image('star', 'assets/star.png'); //24x22
+    game.load.image('diamond', 'assets/diamond.png'); //32x28
     game.load.image('playerAvatar', 'assets/player.png'); //64x64
 }
 
 function Player(entinty, speed, accel){
-
     this.entinty = entinty;
     this.speed = speed;
     this.accel = accel;
@@ -47,14 +47,48 @@ function Player(entinty, speed, accel){
     }
 }
 
+function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed){
+    var _lastArchiveSpawn = 0;
+    var _spawnDelay = spawnDelay;
+    var _collectableSpeed = collectableSpeed;
+    var _minSpeed = minSpeed;
+
+    var _group = group;
+
+    this.spawn = function(){
+        if (game.time.time - _lastArchiveSpawn < _spawnDelay ) return;
+
+        _lastArchiveSpawn = game.time.time;
+
+        if (Math.random() < 0.3){
+            spawnTrouble();
+        }
+        else{
+            spawnArchive(); 
+        }
+    }
+
+    var spawnArchive = function(){
+        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 24));
+
+        var archive = _group.create(spawnX, headerHeight + 12, 'star');
+        archive.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);  
+    }
+
+    var spawnTrouble = function(){
+        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 32));
+
+        var archive = _group.create(spawnX, headerHeight + 14, 'diamond');
+        archive.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);
+    }
+}
+
 var player;
 
-var archiveSpeed = 100;
-
-var archives;
+var collectables;
 var archiveCount = 0;
-var archiveSpawnDelay = 200;
-var lastArchiveSpawn = 0;
+
+var collectableSpawner;
 
 var scoreText;
 
@@ -65,41 +99,41 @@ function create() {
     game.add.sprite(0, 0, 'back');
     game.add.sprite(0, 0, 'header');
 
-    archives = game.add.group();
-    archives.enableBody = true;
+    collectables = game.add.group();
+    collectables.enableBody = true;
 
     var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 32, 'playerAvatar');
     player = new Player(playerSprite, 200, 0);
+
+    collectableSpawner = new CollectableSpawner(collectables, 300, 100, 50);
 
     scoreText = game.add.text(8, 8, 'Você baixou 0 arquivos.', { font: '14px Helvetica', fill: '#FFF' });
 }
 
 function update() {
-    game.physics.arcade.overlap(player.entinty, archives, collectArchive, null, this);
+    game.physics.arcade.overlap(player.entinty, collectables, collect, null, this);
 
     player.move(game.input.keyboard.createCursorKeys());
 
-    spawnArchive();
+    collectableSpawner.spawn();
 }
 
-var collectArchive = function(player, archive){
-    archiveCount++;
+var collect = function(player, collectable){
+    if (collectable.key == 'star'){
+        archiveCount++;
 
-    scoreText.text = 'Você baixou ' + archiveCount + ' arquivos.';
+        scoreText.text = 'Você baixou ' + archiveCount + ' arquivos.';
 
-    archive.kill();
+        collectable.kill();
+    }
+    else{
+        player.kill();
+        gameEnd();      
+    }
 }
 
-var spawnArchive = function(){
-    if (game.time.time - lastArchiveSpawn < archiveSpawnDelay ) return;
-
-    lastArchiveSpawn = game.time.time;
-
-    var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 24));
-
-    var archive = archives.create(spawnX, headerHeight + 12, 'star');
-
-    archive.body.velocity.y += Math.random() * archiveSpeed;
+var gameEnd = function(){
+    console.log('YOU LOSE');
 }
 
 </script>
