@@ -31,8 +31,7 @@ function Player(entinty, speed, accel){
 
     game.physics.arcade.enable(this.entinty);
 
-    this.entinty.body.bounce.y = 0.2;
-    this.entinty.body.gravity.y = 300;
+    this.entinty.body.gravity.y = 0;
     this.entinty.body.collideWorldBounds = true;
 
     this.move = function(cursors){
@@ -47,7 +46,7 @@ function Player(entinty, speed, accel){
     }
 }
 
-function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed){
+function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distractionRate){
     var _lastArchiveSpawn = 0;
     var _spawnDelay = spawnDelay;
     var _collectableSpeed = collectableSpeed;
@@ -55,12 +54,14 @@ function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed){
 
     var _group = group;
 
-    this.spawn = function(){
+    var _distractionRate = distractionRate;
+
+    this.spawn = function(period){
         if (game.time.time - _lastArchiveSpawn < _spawnDelay ) return;
 
         _lastArchiveSpawn = game.time.time;
 
-        if (Math.random() < 0.3){
+        if (Math.random() < _distractionRate[period]){
             spawnTrouble();
         }
         else{
@@ -90,24 +91,38 @@ var archiveCount = 0;
 
 var collectableSpawner;
 
-var scoreText;
-
 var headerHeight = 30;
+
+var currentPeriod = 0;
+
+var periodTarget = [10,10,10,10,10,10,10,10,10,10];
+var periodDistractionRates = [0.3,0.25,0.3,0.4,0.35,0.45,0.5,0.55,0.6,0.6];
+
+var scoreText;
+var periodText;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.add.sprite(0, 0, 'back');
-    game.add.sprite(0, 0, 'header');
+
+    var topHeader = game.add.sprite(0, 0, 'header');
+    topHeader.bringToTop();
+
+    var bottomHeader = game.add.sprite(0, game.world.height - 30, 'header');
+    bottomHeader.bringToTop();
+
+    scoreText  = game.add.text(game.world.width - 100, game.world.height - 22, '0/' + periodTarget[0] + ' arquivos', 
+                               { font: '14px Helvetica', fill: '#FFF' });
+
+    periodText = game.add.text(8, game.world.height - 22, 'Calouro', { font: '14px Helvetica', fill: '#FFF' });
 
     collectables = game.add.group();
     collectables.enableBody = true;
 
-    var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 32, 'playerAvatar');
+    var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 64 - headerHeight, 'playerAvatar');
     player = new Player(playerSprite, 200, 0);
 
-    collectableSpawner = new CollectableSpawner(collectables, 300, 100, 50);
-
-    scoreText = game.add.text(8, 8, 'Você baixou 0 arquivos.', { font: '14px Helvetica', fill: '#FFF' });
+    collectableSpawner = new CollectableSpawner(collectables, 400, 150, 100, periodDistractionRates);
 }
 
 function update() {
@@ -115,25 +130,42 @@ function update() {
 
     player.move(game.input.keyboard.createCursorKeys());
 
-    collectableSpawner.spawn();
+    collectableSpawner.spawn(currentPeriod);
 }
 
 var collect = function(player, collectable){
     if (collectable.key == 'star'){
+        collectable.kill();
+
         archiveCount++;
 
-        scoreText.text = 'Você baixou ' + archiveCount + ' arquivos.';
+        if (archiveCount >= periodTarget[currentPeriod]){
+            currentPeriod++;
 
-        collectable.kill();
+            if (currentPeriod < periodTarget.length - 1){
+                periodText.text = currentPeriod + 1 +'º periodo';          
+            }
+            else if (currentPeriod == periodTarget.length - 1){
+                periodText.text = 'Formando';             
+            }    
+            else{
+                gameEnd(true); 
+                return;
+            }
+
+            archiveCount = 0;   
+        }
+
+        scoreText.text = archiveCount + '/' + periodTarget[currentPeriod] + ' arquivos.';
     }
     else{
         player.kill();
-        gameEnd();      
+        gameEnd(false);      
     }
 }
 
-var gameEnd = function(){
-    console.log('YOU LOSE');
+var gameEnd = function(win){
+    console.log('YOU LOSE ' + win);
 }
 
 </script>
