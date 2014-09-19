@@ -19,6 +19,26 @@ var periodText;
 
 var PdGame = {};
 
+PdGame.MainMenu = function() {
+
+}
+
+PdGame.MainMenu.prototype = {
+    preload: function() {
+        game.load.image('menu', 'assets/menu.png');
+    },
+    create: function() {
+        game.add.sprite(0, 0, 'menu');
+    },
+    update: function() {
+        var startKey = game.input.keyboard.addKey(13);
+        
+        startKey.onDown.add(function(){
+            game.state.start('Game');
+        }, this);
+    }
+}
+
 PdGame.Game = function() {
     this.collect = function(player, collectable){
         if (collectable.key == 'pd'){
@@ -114,6 +134,6 @@ PdGame.Game.prototype = {
 };
 
 var game = new Phaser.Game(600, 600, Phaser.AUTO, 'game');
-//game.state.add('MainMenu', PdGame.MainMenu);
+game.state.add('MainMenu', PdGame.MainMenu);
 game.state.add('Game', PdGame.Game);
-game.state.start('Game');
+game.state.start('MainMenu');
