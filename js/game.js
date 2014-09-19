@@ -1,13 +1,9 @@
 var player;
 
 var collectables;
-var archiveCount = 0;
-
 var collectableSpawner;
 
 var headerHeight = 30;
-
-var currentPeriod = 0;
 
 var PdGame = {};
 
@@ -24,7 +20,7 @@ PdGame.MainMenu.prototype = {
     },
     update: function() {
         var startKey = game.input.keyboard.addKey(13);
-        
+
         startKey.onDown.add(function(){
             game.state.start('Game');
         }, this);
@@ -51,12 +47,15 @@ PdGame.Game = function() {
     this.gameEnded = false;
 
     this.periodTarget = [10,10,12,12,15,15,18,18,20,20];
-    this.periodDistractionRates = [0.3,0.25,0.3,0.4,0.35,0.45,0.4,0.5,0.55,0.55];
+    this.periodDistractionRates = [0.6,0.55,0.6,0.65,0.6,0.65,0.6,0.7,0.75,0.8];
     this.pdRate = [0,0,0.03,0.02,0.01,0.03,0.02,0.03,0.03,0.03];
 
     this.archiveText;
     this.scoreText;
     this.periodText;
+
+    this.archiveCount = 0;
+    this.currentPeriod = 0;
 
     this.collect = function(player, collectable){
         if (collectable.key == 'pd'){
@@ -74,15 +73,15 @@ PdGame.Game = function() {
         }else if (collectable.key == 'archive'){
             collectable.kill();
 
-            archiveCount++;
+            this.archiveCount++;
 
-            if (archiveCount >= this.periodTarget[currentPeriod]){
-                currentPeriod++;
+            if (this.archiveCount >= this.periodTarget[this.currentPeriod]){
+                this.currentPeriod++;
 
-                if (currentPeriod < this.periodTarget.length - 1){
-                    this.periodText.text = currentPeriod + 1 +'º periodo';          
+                if (this.currentPeriod < this.periodTarget.length - 1){
+                    this.periodText.text = this.currentPeriod + 1 +'º periodo';          
                 }
-                else if (currentPeriod == this.periodTarget.length - 1){
+                else if (this.currentPeriod == this.periodTarget.length - 1){
                     this.periodText.text = 'Formando';             
                 }    
                 else{
@@ -90,11 +89,11 @@ PdGame.Game = function() {
                     return;
                 }
 
-                archiveCount = 0;   
+                this.archiveCount = 0;   
             }
 
-            this.scoreText.text = 'Pontos: ' + ((archiveCount * 100) + (currentPeriod * 1000));
-            this.archiveText.text = archiveCount + '/' + this.periodTarget[currentPeriod] + ' arquivos';
+            this.scoreText.text = 'Pontos: ' + ((this.archiveCount * 100) + (this.currentPeriod * 1000));
+            this.archiveText.text = this.archiveCount + '/' + this.periodTarget[this.currentPeriod] + ' arquivos';
         }else{
             player.kill();
             this.finishGame(false);      
@@ -103,14 +102,6 @@ PdGame.Game = function() {
 
     this.finishGame = function(win){
         this.gameEnded = true;
-
-        /*
-        collectables.forEach(function(item){
-            if (item.alive){
-                item.body.velocity.y = 0;
-            }
-        }, true);
-        */
     }
 };
 
@@ -124,6 +115,8 @@ PdGame.Game.prototype = {
         game.load.image('playerAvatar', 'assets/player.png'); //64x64
 
         this.gameEnded = false;
+        this.archiveCount = 0;
+        this.currentPeriod = 0;
     },
 
     create: function() {
@@ -150,17 +143,15 @@ PdGame.Game.prototype = {
         var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 64 - headerHeight, 'playerAvatar');
         player = new Player(playerSprite, 200, 0);
 
-        collectableSpawner = new CollectableSpawner(collectables, 400, 150, 100, this.periodDistractionRates, this.pdRate);
+        collectableSpawner = new CollectableSpawner(collectables, 350, 150, 100, this.periodDistractionRates, this.pdRate);
     },
 
     update: function() {
         if (this.gameEnded) return;
 
         game.physics.arcade.overlap(player.entinty, collectables, this.collect, null, this);
-
         player.move(game.input.keyboard.createCursorKeys());
-
-        collectableSpawner.spawn(currentPeriod);
+        collectableSpawner.spawn(this.currentPeriod);
     }
 };
 
