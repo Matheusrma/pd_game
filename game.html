@@ -21,6 +21,7 @@ function preload() {
     game.load.image('header', 'assets/header.png');
     game.load.image('archive', 'assets/archive.png'); //32x32
     game.load.image('beer', 'assets/beer.png'); //32x32
+    game.load.image('pd', 'assets/pd.png'); //32x32
     game.load.image('playerAvatar', 'assets/player.png'); //64x64
 }
 
@@ -55,32 +56,30 @@ function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distr
     var _group = group;
 
     var _distractionRate = distractionRate;
+    var _pdRate = pdRate;
 
     this.spawn = function(period){
         if (game.time.time - _lastArchiveSpawn < _spawnDelay ) return;
 
         _lastArchiveSpawn = game.time.time;
+        
+        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 32));
 
-        if (Math.random() < _distractionRate[period]){
-            spawnTrouble();
+        var dice = Math.random();
+        if (dice < _pdRate[period]){
+            this.spawnObject('pd', spawnX, headerHeight + 20); 
+        }
+        else if (dice < _distractionRate[period]){
+            this.spawnObject('beer', spawnX, headerHeight + 20); 
         }
         else{
-            spawnArchive(); 
+            this.spawnObject('archive', spawnX, headerHeight + 20); 
         }
     }
 
-    var spawnArchive = function(){
-        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 32));
-
-        var archive = _group.create(spawnX, headerHeight + 16, 'archive');
-        archive.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);  
-    }
-
-    var spawnTrouble = function(){
-        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 32));
-
-        var archive = _group.create(spawnX, headerHeight + 16, 'beer');
-        archive.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);
+    this.spawnObject = function(key,posx,posY){
+        var item = _group.create(posx, posY, key);
+        item.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);  
     }
 }
 
@@ -96,7 +95,8 @@ var headerHeight = 30;
 var currentPeriod = 0;
 
 var periodTarget = [10,10,10,10,10,10,10,10,10,10];
-var periodDistractionRates = [0.3,0.25,0.3,0.4,0.35,0.45,0.5,0.55,0.6,0.6];
+var periodDistractionRates = [0.3,0.25,0.3,0.4,0.35,0.45,0.4,0.5,0.55,0.55];
+var pdRate = [0,0,0.03,0.02,0.01,0.03,0.02,0.03,0.03,0.03];
 
 var archiveText;
 var scoreText;
@@ -116,9 +116,7 @@ function create() {
     var textY = game.world.height - 24;
 
     scoreText  = game.add.text(game.world.width - 85, textY, 'Pontos: 0', font);
-
     archiveText  = game.add.text(8, textY, '0/' + periodTarget[0] + ' arquivos',  font);
-
     periodText = game.add.text(260, textY, 'Calouro', font);
 
     collectables = game.add.group();
@@ -139,7 +137,23 @@ function update() {
 }
 
 var collect = function(player, collectable){
-    if (collectable.key == 'archive'){
+    if (collectable.key == 'pd'){
+        console.log('FOI')
+
+        collectable.kill();
+
+        collectables.forEach(function(item){
+            if (item.alive && item.key == 'beer'){
+
+                if (item.inWorld){
+                    console.log(item.x)
+                    collectableSpawner.spawnObject('archive', item.x, item.y);
+                }
+
+                item.kill();    
+            }
+        }, true);
+    }else if (collectable.key == 'archive'){
         collectable.kill();
 
         archiveCount++;
@@ -160,10 +174,10 @@ var collect = function(player, collectable){
 
             archiveCount = 0;   
         }
-        scoreText.text = 'Pontos: ' + archiveCount * 100 + currentPeriod + 1000;
+
+        scoreText.text = 'Pontos: ' + ((archiveCount * 100) + (currentPeriod * 1000));
         archiveText.text = archiveCount + '/' + periodTarget[currentPeriod] + ' arquivos';
-    }
-    else{
+    }else{
         player.kill();
         gameEnd(false);      
     }
