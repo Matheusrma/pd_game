@@ -19,8 +19,8 @@ var game = new Phaser.Game(600, 600, Phaser.AUTO, '', { preload: preload, create
 function preload() {
     game.load.image('back', 'assets/back.png');
     game.load.image('header', 'assets/header.png');
-    game.load.image('star', 'assets/star.png'); //24x22
-    game.load.image('diamond', 'assets/diamond.png'); //32x28
+    game.load.image('archive', 'assets/archive.png'); //32x32
+    game.load.image('beer', 'assets/beer.png'); //32x32
     game.load.image('playerAvatar', 'assets/player.png'); //64x64
 }
 
@@ -70,16 +70,16 @@ function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distr
     }
 
     var spawnArchive = function(){
-        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 24));
+        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 32));
 
-        var archive = _group.create(spawnX, headerHeight + 12, 'star');
+        var archive = _group.create(spawnX, headerHeight + 16, 'archive');
         archive.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);  
     }
 
     var spawnTrouble = function(){
         var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 32));
 
-        var archive = _group.create(spawnX, headerHeight + 14, 'diamond');
+        var archive = _group.create(spawnX, headerHeight + 16, 'beer');
         archive.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);
     }
 }
@@ -134,7 +134,7 @@ function update() {
 }
 
 var collect = function(player, collectable){
-    if (collectable.key == 'star'){
+    if (collectable.key == 'archive'){
         collectable.kill();
 
         archiveCount++;
