@@ -1,0 +1,8 @@
+{
+  "name": "tb-web",
+  "description": "Talent Buddy web development task",
+  "devDependencies": {},
+  "dependencies": {
+    "express": "~3.2.6"
+  }
+}
