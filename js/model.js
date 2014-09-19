@@ -20,7 +20,7 @@ function Player(entinty, speed, accel){
     }
 }
 
-function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distractionRate){
+function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distractionRate, pdRate){
     var _lastArchiveSpawn = 0;
     var _spawnDelay = spawnDelay;
     var _collectableSpeed = collectableSpeed;
