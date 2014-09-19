@@ -18,6 +18,7 @@ var game = new Phaser.Game(600, 600, Phaser.AUTO, '', { preload: preload, create
 
 function preload() {
     game.load.image('back', 'assets/back.png');
+    game.load.image('header', 'assets/header.png');
     game.load.image('star', 'assets/star.png'); //24x22
     game.load.image('playerAvatar', 'assets/player.png'); //64x64
 }
@@ -36,9 +37,12 @@ var lastArchiveSpawn = 0;
 
 var scoreText;
 
+var headerHeight = 30;
+
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.add.sprite(0, 0, 'back');
+    game.add.sprite(0, 0, 'header');
 
     archives = game.add.group();
     archives.enableBody = true;
@@ -50,7 +54,7 @@ function create() {
     player.body.gravity.y = 300;
     player.body.collideWorldBounds = true;
 
-    scoreText = game.add.text(8, 8, 'Você baixou 0 arquivos.', { fontSize: '10px', fill: '#000' });
+    scoreText = game.add.text(8, 8, 'Você baixou 0 arquivos.', { font: '14px Helvetica', fill: '#FFF' });
 }
 
 function update() {
@@ -76,7 +80,7 @@ var spawnArchive = function(){
 
     var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 24));
 
-    var archive = archives.create(spawnX, 12, 'star');
+    var archive = archives.create(spawnX, headerHeight + 12, 'star');
 
     archive.body.velocity.y += Math.random() * archiveSpeed;
 }
