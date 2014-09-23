@@ -32,11 +32,11 @@ function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distr
     var _pdRate = pdRate;
 
     this.spawn = function(period){
-        if (game.time.time - _lastArchiveSpawn < _spawnDelay ) return;
+        if (game.time.time - _lastArchiveSpawn < _spawnDelay[period] ) return;
 
         _lastArchiveSpawn = game.time.time;
         
-        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 32));
+        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 40));
 
         var dice = Math.random();
         if (dice < _pdRate[period]){

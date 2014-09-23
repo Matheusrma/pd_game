@@ -46,9 +46,10 @@ PdGame.Scoreboard.prototype = {
 PdGame.Game = function() {
     this.gameEnded = false;
 
-    this.periodTarget = [10,10,12,12,15,15,18,18,20,20];
-    this.periodDistractionRates = [0.6,0.55,0.6,0.65,0.6,0.65,0.6,0.7,0.75,0.8];
+    this.periodTarget = [5,8,10,10,12,12,15,15,18,20];
+    this.periodDistractionRates = [0.3,0.4,0.5,0.5,0.6,0.65,0.6,0.7,0.75,0.8];
     this.pdRate = [0,0,0.03,0.02,0.01,0.03,0.02,0.03,0.03,0.03];
+    this.periodSpawnDelay = [700,600,600,450,500,350,350,350,300,250];
 
     this.archiveText;
     this.scoreText;
@@ -143,7 +144,7 @@ PdGame.Game.prototype = {
         var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 64 - headerHeight, 'playerAvatar');
         player = new Player(playerSprite, 200, 0);
 
-        collectableSpawner = new CollectableSpawner(collectables, 350, 150, 100, this.periodDistractionRates, this.pdRate);
+        collectableSpawner = new CollectableSpawner(collectables, this.periodSpawnDelay, 150, 100, this.periodDistractionRates, this.pdRate);
     },
 
     update: function() {
