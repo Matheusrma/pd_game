@@ -51,10 +51,6 @@ PdGame.Game = function() {
     this.pdRate = [0,0,0.03,0.02,0.01,0.03,0.02,0.03,0.03,0.03];
     this.periodSpawnDelay = [700,600,600,450,500,350,350,350,300,250];
 
-    this.archiveText;
-    this.scoreText;
-    this.periodText;
-
     this.archiveCount = 0;
     this.currentPeriod = 0;
 
@@ -71,6 +67,11 @@ PdGame.Game = function() {
                     item.kill();    
                 }
             }, true);
+
+            for (var i = 0; i < 6; ++i){
+                collectableSpawner.spawnObject('archive');
+            }
+
         }else if (collectable.key == 'archive'){
             collectable.kill();
 

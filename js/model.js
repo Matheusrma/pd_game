@@ -34,23 +34,24 @@ function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distr
     this.spawn = function(period){
         if (game.time.time - _lastArchiveSpawn < _spawnDelay[period] ) return;
 
-        _lastArchiveSpawn = game.time.time;
-        
-        var spawnX = Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 40));
+        _lastArchiveSpawn = game.time.time;    
 
         var dice = Math.random();
         if (dice < _pdRate[period]){
-            this.spawnObject('pd', spawnX, headerHeight + 20); 
+            this.spawnObject('pd'); 
         }
         else if (dice < _distractionRate[period]){
-            this.spawnObject('beer', spawnX, headerHeight + 20); 
+            this.spawnObject('beer'); 
         }
         else{
-            this.spawnObject('archive', spawnX, headerHeight + 20); 
+            this.spawnObject('archive'); 
         }
     }
 
     this.spawnObject = function(key,posx,posY){
+        posx = posx || Math.max(0, Math.min(Math.random() * game.world.width , game.world.width - 40));
+        posY = posY || headerHeight;
+
         var item = _group.create(posx, posY, key);
         item.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);  
     }
