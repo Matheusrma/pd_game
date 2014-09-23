@@ -83,12 +83,23 @@ PdGame.Game = function() {
                 this.updatePeriod();
             }
 
-            this.scoreText.text = 'Pontos: ' + ((this.archiveCount * 100) + (this.currentPeriod * 1000));
+            this.updateScore();
             this.archiveText.text = this.archiveCount + '/' + this.periodTarget[this.currentPeriod] + ' arquivos';
         }else{
             player.kill();
             this.finishGame(false);      
         }                   
+    }
+
+    this.updateScore = function(){
+        var points = ((this.archiveCount * 100) + (this.currentPeriod * 1000));
+        var prefix = 'Pontos: ';
+
+        for (var i = 0; i < 5 - (points + '').length; ++i){
+            prefix += '0';            
+        }
+
+        this.scoreText.text = prefix + points;
     }
 
     this.updatePeriod = function(){
@@ -151,7 +162,7 @@ PdGame.Game.prototype = {
         var fontBig = { font: '18px Helvetica', fill: '#FFF' , fontWeight:'500'};
         var textY = game.world.height - 24;
 
-        this.scoreText  = game.add.text(game.world.width - 90, textY, 'Pontos: 0', font);
+        this.scoreText  = game.add.text(game.world.width - 100, textY, 'Pontos: 00000', font);
         this.archiveText  = game.add.text(8, textY, '0/' + this.periodTarget[0] + ' arquivos',  font);
         this.periodText = game.add.text(300, textY + 10, 'Calouro', fontBig);
 
