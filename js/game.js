@@ -1,9 +1,14 @@
 var player;
 
 var collectables;
-var collectableSpawner;
 
 var headerHeight = 30;
+
+var _font = { font: '14px Helvetica', fill: '#FFF' , fontWeight:'500' };
+var _fontBig = { font: '18px Helvetica', fill: '#FFF' , fontWeight:'500'};
+var _fontFinish = { font: '30px Helvetica', fill: '#FFF' , fontWeight:'500', wordWrap: true, wordWrapWidth: 390, align: 'center'};
+
+var _gameVictory = false;
 
 var PdGame = {};
 
@@ -17,26 +22,42 @@ PdGame.MainMenu.prototype = {
     },
     create: function() {
         game.add.sprite(0, 0, 'menu');
-    },
-    update: function() {
+
         var startKey = game.input.keyboard.addKey(13);
 
-        startKey.onDown.add(function(){
+        startKey.onDown.addOnce(function(){
             game.state.start('Game');
         }, this);
+    },
+    update: function() {
+        
     }
 }
 
 PdGame.Scoreboard = function() {
-
+    
 }
 
 PdGame.Scoreboard.prototype = {
     preload: function() {
-        game.load.image('back', 'assets/back.png');
+        game.load.image('finishBack', 'assets/finishBack.png');
     },
     create: function() {
-        game.add.sprite(0, 0, 'back');
+        game.add.sprite(100, 125, 'finishBack');
+
+        var victory = _gameVictory ? 'Você venceu!' : 'Você perdeu!';
+
+        this.victoryText  = game.add.text(game.world.width/2, 180, victory, _fontFinish);
+        this.victoryText.anchor.set(0.5);
+
+        this.enterText  = game.add.text(game.world.width/2, 400, 'Aperte Enter para jogar novamente', _fontFinish);
+        this.enterText.anchor.set(0.5);
+
+        var startKey = game.input.keyboard.addKey(13);
+
+        startKey.onDown.addOnce(function(){
+            game.state.start('Game');
+        }, this);
     },
     update: function() {
         
@@ -46,8 +67,7 @@ PdGame.Scoreboard.prototype = {
 PdGame.Game = function() {
     var self = this;
 
-    this.gameEnded = false;
-
+    //this.periodTarget = [1,1,1,1,1,1,1,1,1,1]; //TESTE
     this.periodTarget = [5,8,10,10,12,12,15,15,18,20];
     this.periodDistractionRates = [0.3,0.4,0.5,0.5,0.6,0.65,0.6,0.7,0.75,0.8];
     this.pdRate = [0,0,0.03,0.02,0.01,0.03,0.02,0.03,0.03,0.03];
@@ -63,7 +83,7 @@ PdGame.Game = function() {
             collectables.forEach(function(item){
                 if (item.alive && item.key == 'beer'){
                     if (item.inWorld){
-                        collectableSpawner.spawnObject('archive', item.x, item.y);
+                        self.collectableSpawner.spawnObject('archive', item.x, item.y);
                     }
 
                     item.kill();    
@@ -71,7 +91,7 @@ PdGame.Game = function() {
             }, true);
 
             for (var i = 0; i < 4; ++i){
-                collectableSpawner.spawnObject('archive');
+                self.collectableSpawner.spawnObject('archive');
             }
 
         }else if (collectable.key == 'archive'){
@@ -130,22 +150,30 @@ PdGame.Game = function() {
     }
 
     this.finishGame = function(win){
-        this.gameEnded = true;
+        _gameVictory = win;
+        game.state.start('Scoreboard' , false, false);
     }
 };
 
 PdGame.Game.prototype = {
     preload: function() {
         game.load.image('back', 'assets/back.png');
+        game.load.image('finishBack', 'assets/finishBack.png');
         game.load.image('header', 'assets/header.png');
         game.load.image('archive', 'assets/archive.png'); //32x32
         game.load.image('beer', 'assets/beer.png'); //32x32
         game.load.image('pd', 'assets/pd.png'); //32x32
         game.load.image('playerAvatar', 'assets/player.png'); //64x64
 
-        this.gameEnded = false;
+        _gameVictory = false;
         this.archiveCount = 0;
         this.currentPeriod = 0;
+
+        var startKey = game.input.keyboard.addKey(13);
+
+        startKey.onDown.addOnce(function(){
+            game.state.start('Game');
+        }, this);
     },
 
     create: function() {
@@ -158,13 +186,11 @@ PdGame.Game.prototype = {
         var bottomHeader = game.add.sprite(0, game.world.height - 30, 'header');
         bottomHeader.bringToTop();
 
-        var font = { font: '14px Helvetica', fill: '#FFF' , fontWeight:'500' };
-        var fontBig = { font: '18px Helvetica', fill: '#FFF' , fontWeight:'500'};
         var textY = game.world.height - 24;
 
-        this.scoreText  = game.add.text(game.world.width - 100, textY, 'Pontos: 00000', font);
-        this.archiveText  = game.add.text(8, textY, '0/' + this.periodTarget[0] + ' arquivos',  font);
-        this.periodText = game.add.text(300, textY + 10, 'Calouro', fontBig);
+        this.scoreText  = game.add.text(game.world.width - 100, textY, 'Pontos: 00000', _font);
+        this.archiveText  = game.add.text(8, textY, '0/' + this.periodTarget[0] + ' arquivos',  _font);
+        this.periodText = game.add.text(300, textY + 10, 'Calouro', _fontBig);
 
         this.periodText.anchor.set(0.5);
 
@@ -174,7 +200,7 @@ PdGame.Game.prototype = {
         var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 64 - headerHeight, 'playerAvatar');
         player = new Player(playerSprite, 200, 0);
 
-        collectableSpawner = new CollectableSpawner(collectables, this.periodSpawnDelay, 150, 100, this.periodDistractionRates, this.pdRate);
+        this.collectableSpawner = new CollectableSpawner(collectables, this.periodSpawnDelay, 150, 100, this.periodDistractionRates, this.pdRate);
     },
 
     update: function() {
@@ -182,11 +208,12 @@ PdGame.Game.prototype = {
 
         game.physics.arcade.overlap(player.entinty, collectables, this.collect, null, this);
         player.move(game.input.keyboard.createCursorKeys());
-        collectableSpawner.spawn(this.currentPeriod);
+        this.collectableSpawner.spawn(this.currentPeriod);
     }
 };
 
 var game = new Phaser.Game(600, 600, Phaser.AUTO, 'game');
 game.state.add('MainMenu', PdGame.MainMenu);
 game.state.add('Game', PdGame.Game);
+game.state.add('Scoreboard', PdGame.Scoreboard);
 game.state.start('MainMenu');
