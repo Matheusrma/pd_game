@@ -44,6 +44,8 @@ PdGame.Scoreboard.prototype = {
 }
 
 PdGame.Game = function() {
+    var self = this;
+
     this.gameEnded = false;
 
     this.periodTarget = [5,8,10,10,12,12,15,15,18,20];
@@ -68,7 +70,7 @@ PdGame.Game = function() {
                 }
             }, true);
 
-            for (var i = 0; i < 6; ++i){
+            for (var i = 0; i < 4; ++i){
                 collectableSpawner.spawnObject('archive');
             }
 
@@ -78,20 +80,7 @@ PdGame.Game = function() {
             this.archiveCount++;
 
             if (this.archiveCount >= this.periodTarget[this.currentPeriod]){
-                this.currentPeriod++;
-
-                if (this.currentPeriod < this.periodTarget.length - 1){
-                    this.periodText.text = this.currentPeriod + 1 +'º periodo';          
-                }
-                else if (this.currentPeriod == this.periodTarget.length - 1){
-                    this.periodText.text = 'Formando';             
-                }    
-                else{
-                    this.finishGame(true); 
-                    return;
-                }
-
-                this.archiveCount = 0;   
+                this.updatePeriod();
             }
 
             this.scoreText.text = 'Pontos: ' + ((this.archiveCount * 100) + (this.currentPeriod * 1000));
@@ -100,6 +89,33 @@ PdGame.Game = function() {
             player.kill();
             this.finishGame(false);      
         }                   
+    }
+
+    this.updatePeriod = function(){
+        this.currentPeriod++;
+
+        var bounce = game.add.tween(this.periodText.scale);
+        bounce.to({ x: 1.05, y:1.05 }, 400, Phaser.Easing.Linear.None);
+
+        bounce.onComplete.add(function(){
+            self.periodText.scale.x = 1;
+            self.periodText.scale.y = 1;
+        });
+
+        if (this.currentPeriod < this.periodTarget.length - 1){
+            this.periodText.text = this.currentPeriod + 1 +'º periodo';  
+            bounce.start();        
+        }
+        else if (this.currentPeriod == this.periodTarget.length - 1){
+            this.periodText.text = 'Formando';             
+            bounce.start();
+        }    
+        else{
+            this.finishGame(true); 
+            return;
+        }
+
+        this.archiveCount = 0;   
     }
 
     this.finishGame = function(win){
@@ -132,12 +148,14 @@ PdGame.Game.prototype = {
         bottomHeader.bringToTop();
 
         var font = { font: '14px Helvetica', fill: '#FFF' , fontWeight:'500' };
-        var fontBig = { font: '18px Helvetica', fill: '#FFF' , fontWeight:'500' };
+        var fontBig = { font: '18px Helvetica', fill: '#FFF' , fontWeight:'500'};
         var textY = game.world.height - 24;
 
         this.scoreText  = game.add.text(game.world.width - 90, textY, 'Pontos: 0', font);
         this.archiveText  = game.add.text(8, textY, '0/' + this.periodTarget[0] + ' arquivos',  font);
-        this.periodText = game.add.text(260, textY - 2, 'Calouro', fontBig);
+        this.periodText = game.add.text(300, textY + 10, 'Calouro', fontBig);
+
+        this.periodText.anchor.set(0.5);
 
         collectables = game.add.group();
         collectables.enableBody = true;
