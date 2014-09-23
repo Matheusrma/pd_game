@@ -9,6 +9,8 @@ var _fontBig = { font: '18px Helvetica', fill: '#FFF' , fontWeight:'500'};
 var _fontFinish = { font: '30px Helvetica', fill: '#FFF' , fontWeight:'500', wordWrap: true, wordWrapWidth: 390, align: 'center'};
 
 var _gameVictory = false;
+var _archiveCount = 0;
+var _currentPeriod = 0;
 
 var PdGame = {};
 
@@ -49,6 +51,16 @@ PdGame.Scoreboard.prototype = {
 
         this.victoryText  = game.add.text(game.world.width/2, 180, victory, _fontFinish);
         this.victoryText.anchor.set(0.5);
+
+        var period = 'Você chegou ao período ' + _currentPeriod + 1;
+
+        this.periodText  = game.add.text(game.world.width/2, 250, period, _fontFinish);
+        this.periodText.anchor.set(0.5);
+
+        var archive = 'Você baixou ' + _archiveCount + (_archiveCount > 1? ' arquivos' :' arquivo');
+
+        this.archivesText  = game.add.text(game.world.width/2, 320, archive, _fontFinish);
+        this.archivesText.anchor.set(0.5);
 
         this.enterText  = game.add.text(game.world.width/2, 400, 'Aperte Enter para jogar novamente', _fontFinish);
         this.enterText.anchor.set(0.5);
@@ -151,6 +163,8 @@ PdGame.Game = function() {
 
     this.finishGame = function(win){
         _gameVictory = win;
+        _archiveCount = this.archiveCount;
+        _currentPeriod = this.currentPeriod;
         game.state.start('Scoreboard' , false, false);
     }
 };
@@ -166,6 +180,9 @@ PdGame.Game.prototype = {
         game.load.image('playerAvatar', 'assets/player.png'); //64x64
 
         _gameVictory = false;
+        _archiveCount = 0;
+        _currentPeriod = 0;
+
         this.archiveCount = 0;
         this.currentPeriod = 0;
 
