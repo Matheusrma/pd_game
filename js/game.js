@@ -52,7 +52,7 @@ PdGame.Scoreboard.prototype = {
         this.victoryText  = game.add.text(game.world.width/2, 180, victory, _fontFinish);
         this.victoryText.anchor.set(0.5);
 
-        var period = 'Você chegou ao período ' + _currentPeriod + 1;
+        var period = 'Você chegou ao período ' + (_currentPeriod + 1);
 
         this.periodText  = game.add.text(game.world.width/2, 250, period, _fontFinish);
         this.periodText.anchor.set(0.5);
@@ -82,8 +82,10 @@ PdGame.Game = function() {
     //this.periodTarget = [1,1,1,1,1,1,1,1,1,1]; //TESTE
     this.periodTarget = [5,8,10,10,12,12,15,15,18,20];
     this.periodDistractionRates = [0.3,0.4,0.5,0.5,0.6,0.65,0.6,0.7,0.75,0.8];
-    this.pdRate = [0,0,0.03,0.02,0.01,0.03,0.02,0.03,0.03,0.03];
+    this.pdRate = [0,0,0.03,0.02,0.02,0.02,0.02,0.02,0.02,0.02];
     this.periodSpawnDelay = [700,600,600,450,500,350,350,350,300,250];
+    this.periodSpeed = [150,150,150,150,150,150,150,150,150,150];
+    this.periodSpeedMin = [100,100,100,100,100,100,100,100,100,100];
 
     this.archiveCount = 0;
     this.currentPeriod = 0;
@@ -217,7 +219,7 @@ PdGame.Game.prototype = {
         var playerSprite = game.add.sprite(game.world.width/2 - 32, game.world.height - 64 - headerHeight, 'playerAvatar');
         player = new Player(playerSprite, 200, 0);
 
-        this.collectableSpawner = new CollectableSpawner(collectables, this.periodSpawnDelay, 150, 100, this.periodDistractionRates, this.pdRate);
+        this.collectableSpawner = new CollectableSpawner(collectables, this.periodSpawnDelay, this.periodSpeed, this.periodSpeedMin, this.periodDistractionRates, this.pdRate);
     },
 
     update: function() {

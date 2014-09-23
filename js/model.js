@@ -31,7 +31,11 @@ function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distr
     var _distractionRate = distractionRate;
     var _pdRate = pdRate;
 
+    var _period = 0;
+
     this.spawn = function(period){
+        _period = period;
+
         if (game.time.time - _lastArchiveSpawn < _spawnDelay[period] ) return;
 
         _lastArchiveSpawn = game.time.time;    
@@ -53,6 +57,6 @@ function CollectableSpawner(group, spawnDelay, collectableSpeed, minSpeed, distr
         posY = posY || headerHeight;
 
         var item = _group.create(posx, posY, key);
-        item.body.velocity.y += Math.max(_minSpeed, Math.random() * _collectableSpeed);  
+        item.body.velocity.y += Math.max(_minSpeed[_period], Math.random() * _collectableSpeed[_period]);  
     }
 }
